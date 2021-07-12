@@ -4,6 +4,7 @@ from time import sleep
 
 from loguru import logger
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import \
@@ -16,7 +17,11 @@ WAIT_SEC = 60
 
 
 def get_driver() -> webdriver.Chrome:
-    return webdriver.Chrome(executable_path=os.path.join(os.getcwd(), 'chromedriver'))
+    try:
+        driver = webdriver.Chrome(executable_path=os.path.join(os.getcwd(), 'chromedriver'))
+    except WebDriverException:
+        driver = webdriver.Chrome(executable_path=os.path.join(os.getcwd(), 'chromedriver.exe'))
+    return driver
 
 
 def login_web_master(driver: webdriver.Chrome, login: str, pswrd: str):
