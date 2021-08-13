@@ -1,10 +1,11 @@
+#!/usr/bin/env python3
 import csv
 import os
 from time import sleep
+import platform
 
 from loguru import logger
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import \
@@ -17,11 +18,13 @@ WAIT_SEC = 60
 
 
 def get_driver() -> webdriver.Chrome:
-    try:
-        driver = webdriver.Chrome(executable_path=os.path.join(os.getcwd(), 'chromedriver'))
-    except WebDriverException:
-        driver = webdriver.Chrome(executable_path=os.path.join(os.getcwd(), 'chromedriver.exe'))
-    return driver
+    cur_platform = platform.system()
+    if cur_platform == 'Darwin' or cur_platform == 'Linux':
+        executable_path = os.path.join(os.getcwd(), 'chromedriver')
+    elif cur_platform == 'Windows':
+        executable_path = os.path.join(os.getcwd(), 'chromedriver.exe')
+
+    return webdriver.Chrome(executable_path=executable_path)
 
 
 def login_web_master(driver: webdriver.Chrome, login: str, pswrd: str):
@@ -107,7 +110,7 @@ def add_hosts_with_region(driver, hosts):
 @logger.catch
 def run():
     with get_driver() as driver:
-        with open('hosts.csv', 'r') as hosts_file:
+        with open('hosts.csv', 'r', encoding='utf-8') as hosts_file:
             hosts = csv.reader(hosts_file)
             login, pswrd, *_tail = hosts.__next__()
             login_web_master(driver, login, pswrd)
